@@ -1,0 +1,174 @@
+	Tensilica Avnet XT-AV110 FPGA Evaluation Board
+	==============================================
+
+This board is a Xilinx Virtex-4 MB Development Kit from Avnet configured
+with an FPGA bitstream from Tensilica. The combination of the Avnet FPGA
+board and Tensilica bitstream is called the XT-AV110 by Tensilica.
+
+The configured XT-AV110 board provides:
+- Currently perhaps up to two Xtensa or Diamond processor cores.
+- An on-chip-debug (OCD) JTAG interface.
+- 128 MB of DDR SDRAM memory which is mappable to ROM space for OCD debugging.
+- 16 MB of Flash memory mappable to ROM space.
+- A NSC 16550 compatible UART and serial port.
+- An OpenCores Wishbone 10/100-base-T ethernet interface.
+
+Please see doc/README-xtensa for information concerning the Xtensa
+architecture (of which Diamond cores are instances).
+
+
+Setting up the Board
+--------------------
+
+The serial port defaults to 38000 baud, no parity and 1 stop bit.
+A terminal emulator must be set accordingly to see the U-Boot prompt.
+
+The board contains an 8-way DIP switch that controls the boot mapping
+and selects from a range of default ethernet MAC addresses.
+
+Boot Mapping (DIP switch 8):
+
+    DIP switch 8 maps the system ROM address space (in which the
+    reset vector resides) to either SDRAM (off, 0, down) or Flash
+    (on, 1, up).  This mapping is implemented in the FPGA bitstream
+    and cannot be disabled by software, therefore DIP switch 8 is no
+    available for application use. Note DIP switch 7 is reserved by
+    Tensilica for future possible hardware use.
+
+    Mapping to SRAM allows U-Boot to be debugged with an OCD/JTAG
+    tool such as the Xtensa OCD Daemon connected via a suppored probe.
+    See the tools documentation for supported probes and how to
+    connect them.  
+
+    The Flash is always mapped at a device (memory mapped I/O) address
+    (the address is board specific and is expressed as CFG_FLASH_BASE).
+    The device address is used by U-Boot to program the flash, and may
+    be used to specify an application to run or U-Boot image to boot.
+
+Default MAC Address (DIP switches 1-6):
+
+    When the board is first powered on, or after the environment has
+    been reinitialized, the ethernet MAC address receives a default
+    value whose least significant 6 bits come from DIP switches 1-6.
+    The default is 00:50:C2:13:6F:xx where xx ranges from 0..3F
+    according to the DIP switches, where "on"==1 and "off"==0, and
+    switch 1 is the least-significant bit.
+
+    After initial startup, the MAC address is stored in the U-Boot
+    environment variable 'ethaddr'. The user may change this to any
+    other address with the "setenv" comamnd. After the environment
+    has been saved to Flash by the "saveenv" command, this will be
+    used and the DIP switches no longer consulted. DIP swithes 1-6
+    may then be used for application purposes.
+
+
+LX110 doesn't have the Debugging Limitations
+--------------------------------------------
+
+The XT-AV110 board 128MB of SRAM that can be mapped
+to the system ROM address space for debugging a ROM image under
+OCD/JTAG. So there isn't a limit on the size of U-Boot to 
+128 KB (0x20000) as there is on the LX60.
+
+The u-boot code can be compiled -O0 without any problems;
+for example by editing DBGFLAGS and OPTFLAGS in the config.mk 
+at the top level directory.
+
+Flash Problems:
+---------------
+There appears to be problem saving the hardware protection
+bits for the flash. This is being investigated. Note that
+enabling DEBUG in the flash code appears to prevent the
+saveenv command from saving it's data in the flash. 
+
+
+Using u-boot to boot Linux
+--------------------------
+
+While debugging u-boot you likely should modify $(TOPDIR)/config.mk
+with:
+	DBGFLAGS= -g
+	OPTFLAGS= -O0
+
+Note that -g3 seems to mess up the CPP on the cpu linkerscript.
+
+Once u-boot has been compiled you likely want to:
+
+  1. Copy tools/mkimage ~/bin to make it available to 
+     Linux kernel makefiles.
+
+  2. Copy u-boot/u-boot.bin to tftp server so it can be 
+     saved in flash.
+
+  3. Build the kernel and copy linux/arch/xtensa/boot/uImage 
+     to tftp server so it can be downloaded via tftp with u-boot.
+
+  4. Set up environement variables on u-boot; Ex:
+	setenv serverip 192.168.11.78           rtos-lab2       Used by tftp
+	setenv ipaddr 192.168.11.95             Piet's LX60
+	setenv bootfile u-boot.bin
+	setenv bootfile uImage.xtensa-2.6.29-smp.test_mmuhifi_c3
+	setenv bootargs console=ttyS0,38400 ip=bootp root=nfs coredump_filter=0x00
+	setenv bootdelay 10
+	setenv bootcmd tftpboot\; bootm
+	setenv autostart yes
+	saveenv                          
+
+  5. Try booting linux and once it boots with u-boot it's likely
+     a good time to save u-boot in the first two sectors of the
+     flash.
+
+	a.  Copy u-boot/u-boot.bin to tftp server so it can be
+	    saved in flash.
+
+	b. Copy it to memory via tftpboot cmd.
+
+	c. Turn off protection on sectors to save u-boot
+		protect off F8000000 F803FFFF
+		... done
+        	Un-Protected 2 sectors
+
+	d. cp.b d2000000 F8000000 40000
+		Copy to Flash... done
+
+	e. protect on F8000000 F803FFFF
+		... done
+        	Protected 3 sectors
+
+  6. Now set DIP switch 8 on and power cycle the board.
+     u-boot should prompt. Ex:
+
+		U-Boot 2009.08-00060-g3aa8b68-dirty (Sep 16 2009 - 00:46:59)
+		
+		CPU:    Xtensa test_mmuhifi_c3 at 41.6777 MHz
+		Board:  XT-AV110: Avnet board + Xilinx LX200 FPGA + Tensilica bitstream
+		SysRAM: 96 MB
+		Flash: 16 MB
+		In:    serial
+		Out:   serial
+		Err:   serial
+		MAC:
+		IP:     192.168.11.95
+		Autobooting in 10 seconds, press <SPACE> to stop
+
+
+For more information on the LX200 visit Tensilica's Web site. Ex:
+
+	http://www.tensilica.com/products/hw-sw-dev-tools/hw-emulation.htm
+	http://www.tensilica.com/partners/hw-proto-emulation/avnet.htm
+	http://fpgablog.com/posts/xtensa-avnet-xilinx/
+
+The LX110 uses the Intel Strata Flash Embedded Memory (P30) Family:
+
+	http://www.developers.net/intelisdshowcase/view/2600
+
+
+Hardware and Software Interfaces to the Flash is at:
+
+	http://pdf1.alldatasheet.com/datasheet-pdf/view/123692/INTEL/PC28F128J3C-110.html
+
+Perhaps this doc also applies:
+
+	www.xilinx.com/products/boards/ml505/datasheets/30666604.pdf 
+
+-piet

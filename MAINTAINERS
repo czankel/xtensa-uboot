@@ -1334,5 +1334,16 @@ Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>
 	openrisc-generic	OpenRISC
 
 #########################################################################
+# Xtensa Systems:							#
+#									#
+# Maintainer Name, Email Address					#
+#	Board		CPU						#
+#########################################################################
+
+Chris Zankel <chris@zankel.net>
+
+	XTAV			Xtensa
+
+#########################################################################
 # End of MAINTAINERS list						#
 #########################################################################

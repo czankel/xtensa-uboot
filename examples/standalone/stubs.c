@@ -195,6 +195,18 @@ gd_t *global_data;
 "	l.jr	r13\n"		\
 "	l.nop\n"				\
 	: : "i"(offsetof(gd_t, jt)), "i"(XF_ ## x * sizeof(void *)) : "r13");
+#elif defined(CONFIG_XTENSA)
+/*
+ *
+ */
+static void **jt;
+gd_t *global_data;
+#define EXPORT_FUNC(x)			\
+	asm volatile (			\
+"	.globl " #x "\n"		\
+"	.align 4\n"			\
+#x ":\n"
+
 #else
 /*"	addi	$sp, $sp, -24\n"	\
 "	br	$r16\n"			\*/
