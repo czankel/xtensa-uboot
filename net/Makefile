@@ -27,6 +27,9 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)libnet.o
 
+ifneq ($(CONFIG_CMD_NET),y)
+  error "CONFIG ERROR"
+endif
 COBJS-$(CONFIG_CMD_NET)  += arp.o
 COBJS-$(CONFIG_CMD_NET)  += bootp.o
 COBJS-$(CONFIG_CMD_CDP)  += cdp.o

@@ -176,11 +176,11 @@
 
 /* U-Boot area in RAM after unpacking ('make' symbol TEXT_BASE points here) */
 #define CONFIG_SYS_TEXT_LEN		(CONFIG_SYS_MONITOR_LEN - CONFIG_SYS_GBL_DATA_SIZE)
-#define CONFIG_SYS_TEXT_BASE		(CONFIG_SYS_HEAP_BASE - CONFIG_SYS_MONITOR_LEN)
+#define XTENSA_SYS_TEXT_BASE		(CONFIG_SYS_HEAP_BASE - CONFIG_SYS_MONITOR_LEN)
 
 /* Linux boot params area in RAM (used only when booting linux) */
 #define CONFIG_SYS_BOOTPARAMS_LEN	(64  << 10)	/* linux boot param area size */
-#define CONFIG_SYS_BOOTPARAMS_BASE	(CONFIG_SYS_TEXT_BASE - CONFIG_SYS_BOOTPARAMS_LEN)
+#define CONFIG_SYS_BOOTPARAMS_BASE	(XTENSA_SYS_TEXT_BASE - CONFIG_SYS_BOOTPARAMS_LEN)
 
 /* U-Boot initial RAM area before it unpacks itself (not used in this port). */
 
@@ -246,6 +246,7 @@
 /* U-Boot commands */
 /*=================*/
 #include <config_cmd_default.h>
+#warning CMD_DEFAULT
 #define CONFIG_CMD_ASKENV
 #define CONFIG_CMD_DHCP
 #define CONFIG_CMD_DIAG

@@ -53,7 +53,7 @@ SECTIONS
   . = ALIGN(4096);
 
   __memory_avail_start = .;
-  . = CONFIG_SYS_TEXT_BASE;
+  . = XTENSA_SYS_TEXT_BASE;
   __memory_avail_end = .;
 
   SECTION_text(ALIGN(16), FOLLOWING(.DoubleExceptionVector.text))

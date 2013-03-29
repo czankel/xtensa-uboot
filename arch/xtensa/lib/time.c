@@ -57,12 +57,11 @@ static void delay_cycles(unsigned cycles)
 #endif
 }
 
-#if 0
 /*
  * Delay (busy-wait) for a number of microseconds.
  */
 
-void udelay(unsigned long usec)
+void __udelay(unsigned long usec)
 {
 	ulong lo, hi, i;
         ulong mhz = CONFIG_SYS_CLK_FREQ / 1000000;
@@ -75,7 +74,6 @@ void udelay(unsigned long usec)
 		delay_cycles(mhz << 22);
 	delay_cycles(mhz * lo);
 }
-#endif
 
 
 /*

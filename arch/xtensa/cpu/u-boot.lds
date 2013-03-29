@@ -442,10 +442,7 @@ SECTIONS
   .text ALIGN(16) : AT(((LOADADDR(.DoubleExceptionVector.text) + SIZEOF(.DoubleExceptionVector.text) + 4 -1)) & ~(4 -1)) { _text_start = ABSOLUTE(.); *(.literal .text) *(.literal.* .text.* .stub) *(.gnu.warning .gnu.linkonce.literal.*) *(.gnu.linkonce.t.*.literal .gnu.linkonce.t.*) *(.fini.literal) *(.fini) *(.gnu.version) _text_end = ABSOLUTE(.); }
   .rodata ALIGN(16) : AT(((LOADADDR(.text) + SIZEOF(.text) + 4 -1)) & ~(4 -1)) { _rodata_start = ABSOLUTE(.); *(.rodata) *(.rodata.*) *(.gnu.linkonce.r.*) *(.rodata1) __XT_EXCEPTION_TABLE__ = ABSOLUTE(.); *(.xt_except_table) *(.gcc_except_table) *(.gnu.linkonce.e.*) *(.gnu.version_r) . = ALIGN(16); __u_boot_cmd_start = ABSOLUTE(.); *(.u_boot_cmd) __u_boot_cmd_end = ABSOLUTE(.); _rodata_end = ABSOLUTE(.); }
   .data ALIGN(16) : AT(((LOADADDR(.rodata) + SIZEOF(.rodata) + 4 -1)) & ~(4 -1)) { _data_start = ABSOLUTE(.); *(.data) *(.data.*) *(.gnu.linkonce.d.*) *(.data1) *(.sdata) *(.sdata.*) *(.gnu.linkonce.s.*) *(.sdata2) *(.sdata2.*) *(.gnu.linkonce.s2.*) *(.jcr) *(.eh_frame) *(.dynamic) *(.gnu.version_d) _data_end = ABSOLUTE(.); }
-  .bss ALIGN(16) : AT(((LOADADDR(.data) + SIZEOF(.data) + 4 -1)) & ~(4 -1)) { . = ALIGN (8); _bss_start = ABSOLUTE(.); __bss_start = ABSOLUTE(.); *(.dynsbss) *(.sbss) *(.sbss.*) *(.gnu.linkonce.sb.*) *(.scommon) *(.sbss2) *(.sbss2.*) *(.gnu.linkonce.sb2.*) *(.dynbss) *(.bss) *(.bss.*) *(.gnu.linkonce.b.*) *(COMMON) *(.sram.bss) . = ALIGN (8); _bss_end = ABSOLUTE(.); __bss_end = ABSOLUTE(.); _end = ALIGN(0x8); PROVIDE(end = ALIGN(0x8)); _stack_sentry = ALIGN(0x8); }
-  __stack = ((0xD0000000 - 0x00000000) + 0x04000000);
-  __heap_start = .;
-  .reloc.data (LOADADDR(.bss) + SIZEOF(.bss) + 3) & ~ 3 : AT(((LOADADDR(.bss) + SIZEOF(.bss) + 4 -1)) & ~(4 -1))
+  .reloc.data (LOADADDR(.data) + SIZEOF(.data) + 3) & ~ 3 : AT(((LOADADDR(.data) + SIZEOF(.data) + 4 -1)) & ~(4 -1))
   {
     __boot_reloc_table_start = ABSOLUTE(.);
     LONG(_WindowVectors_text_start); LONG(_WindowVectors_text_end); LONG(LOADADDR(.WindowVectors.text));;
@@ -462,6 +459,9 @@ SECTIONS
   }
   __monitor_start = LOADADDR(.ResetVector.text);
   __monitor_end = LOADADDR(.reloc.data) + SIZEOF(.reloc.data);
+  .bss ALIGN(16) : AT(((LOADADDR(.reloc.data) + SIZEOF(.reloc.data) + 4 -1)) & ~(4 -1)) { . = ALIGN (8); _bss_start = ABSOLUTE(.); __bss_start = ABSOLUTE(.); *(.dynsbss) *(.sbss) *(.sbss.*) *(.gnu.linkonce.sb.*) *(.scommon) *(.sbss2) *(.sbss2.*) *(.gnu.linkonce.sb2.*) *(.dynbss) *(.bss) *(.bss.*) *(.gnu.linkonce.b.*) *(COMMON) *(.sram.bss) . = ALIGN (8); _bss_end = ABSOLUTE(.); __bss_end = ABSOLUTE(.); _end = ALIGN(0x8); PROVIDE(end = ALIGN(0x8)); _stack_sentry = ALIGN(0x8); }
+  __stack = ((0xD0000000 - 0x00000000) + 0x04000000);
+  __heap_start = .;
   /*
    * On many Xtensa boards a region of RAM may be mapped to the ROM address 
    * space to facilitate on-chip-debug, and U-Boot must fit with that region.
