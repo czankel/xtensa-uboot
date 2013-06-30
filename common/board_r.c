@@ -919,7 +919,7 @@ init_fnc_t init_sequence_r[] = {
 
 void board_init_r(gd_t *new_gd, ulong dest_addr)
 {
-#ifndef CONFIG_X86
+#if !defined(CONFIG_X86) && !defined(CONFIG_XTENSA)
 	gd = new_gd;
 #endif
 	if (initcall_run_list(init_sequence_r))
